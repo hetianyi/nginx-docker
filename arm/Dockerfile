@@ -1,7 +1,9 @@
 # build nginx docker images with stream module
 FROM arm32v6/alpine
 MAINTAINER "hehety<hehety@outlook.com>"
-RUN apk add libxslt-dev && apk add libxml2 && \
+RUN echo "http://mirrors.aliyun.com/alpine/v3.8/main/" > /etc/apk/repositories && \
+    echo "http://mirrors.aliyun.com/alpine/v3.8/community/" >> /etc/apk/repositories && \
+    apk add libxslt-dev && apk add libxml2 && \
         apk add gd-dev && \
         apk add geoip-dev && \
         apk add libatomic_ops-dev && \
@@ -47,7 +49,9 @@ make && make install
 
 FROM arm32v6/alpine
 COPY --from=0 /usr/local/nginx /usr/local/nginx
-RUN apk add libxslt libxml2 gd geoip libatomic_ops pcre zlib openssl
+RUN echo "http://mirrors.aliyun.com/alpine/v3.8/main/" > /etc/apk/repositories && \
+    echo "http://mirrors.aliyun.com/alpine/v3.8/community/" >> /etc/apk/repositories && \
+    apk add libxslt libxml2 gd geoip libatomic_ops pcre zlib openssl
 WORKDIR /usr/local/nginx
 ENV PATH /usr/local/nginx/sbin:$PATH
 CMD ["nginx", "-g", "daemon off;"]
