@@ -1,20 +1,34 @@
 # build nginx docker images with stream module
 FROM alpine
 MAINTAINER "hehety<hehety@outlook.com>"
-RUN apk add libxslt-dev && apk add libxml2 && \
-        apk add gd-dev && \
-        apk add geoip-dev && \
-        apk add libatomic_ops-dev && \
-        apk add pcre-dev && \
-        apk add zlib-dev && \
-        apk add build-base && \
-        apk add libaio-dev && \
-        apk add openssl-dev && \
+
+ENV NGINX_VERSION 1.15.8
+
+RUN apk add --no-cache --virtual .build-deps \
+        libxslt-dev \
+        libxml2 \
+        gd-dev \
+        geoip-dev \
+        libatomic_ops-dev \
+        pcre-dev \
+        zlib-dev \
+        build-base \
+        libaio-dev \
+        openssl-dev && \
+addgroup -g 101 -S nginx && \
+adduser -S -D -H -u 101 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx && \
 cd /tmp && \
 wget http://nginx.org/download/nginx-1.15.8.tar.gz && \
 tar -xzf nginx-1.15.8.tar.gz && \
 cd nginx-1.15.8 && \
-./configure --prefix=/usr/local/nginx \
+./configure --prefix=/usr/share/nginx \
+--sbin-path=/usr/bin/nginx \
+--conf-path=/etc/nginx/nginx.conf \
+--pid-path=/var/run/nginx.pid \
+--lock-path=/var/run/nginx.lock \
+--error-log-path=/var/log/nginx/error.log \
+--http-log-path=/var/log/nginx/access.log \
+--user=nginx \
 --with-select_module \
 --with-poll_module \
 --with-threads \
@@ -43,11 +57,22 @@ cd nginx-1.15.8 && \
 --with-compat \
 --with-libatomic \
 --with-debug && \
-make && make install
+make && make install && \
+cp -rf html /usr/share/nginx && \
+rm -rf /tmp/* && \
+mkdir -p /var/run && \
+mkdir -p /var/log/nginx && \
+apk del .build-deps && \
+apk add libxslt libxml2 gd geoip libatomic_ops pcre zlib openssl
 
-FROM alpine
-COPY --from=0 /usr/local/nginx /usr/local/nginx
-RUN apk add libxslt libxml2 gd geoip libatomic_ops pcre zlib openssl
-WORKDIR /usr/local/nginx
-ENV PATH /usr/local/nginx/sbin:$PATH
+
+
+
+
+ADD nginx.conf /etc/nginx/nginx.conf
+
+EXPOSE 80
+
+STOPSIGNAL SIGTERM
+
 CMD ["nginx", "-g", "daemon off;"]
