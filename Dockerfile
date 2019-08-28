@@ -1,8 +1,10 @@
 # build nginx docker images with stream module
-FROM alpine
+FROM alpine:3.10.2
 MAINTAINER "hehety<hehety@outlook.com>"
 
-ENV NGINX_VERSION 1.15.8
+ARG NGINX_VERSION=${NGINX_VERSION:-1.15.8}
+
+ENV NGINX_VERSION $NGINX_VERSION
 
 RUN apk add --no-cache --virtual .build-deps \
         libxslt-dev \
@@ -18,9 +20,9 @@ RUN apk add --no-cache --virtual .build-deps \
 addgroup -g 101 -S nginx && \
 adduser -S -D -H -u 101 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx && \
 cd /tmp && \
-wget http://nginx.org/download/nginx-1.15.8.tar.gz && \
-tar -xzf nginx-1.15.8.tar.gz && \
-cd nginx-1.15.8 && \
+wget http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz && \
+tar -xzf nginx-${NGINX_VERSION}.tar.gz && \
+cd nginx-${NGINX_VERSION} && \
 ./configure --prefix=/usr/share/nginx \
 --sbin-path=/usr/bin/nginx \
 --conf-path=/etc/nginx/nginx.conf \
@@ -63,14 +65,16 @@ rm -rf /tmp/* && \
 mkdir -p /var/run && \
 mkdir -p /var/log/nginx && \
 apk del .build-deps && \
-apk add libxslt libxml2 gd geoip libatomic_ops pcre zlib openssl
+apk add libxslt libxml2 gd geoip libatomic_ops pcre zlib openssl && \
+# Bring in tzdata so users could set the timezones through the environment
+apk add --no-cache tzdata && \
+# forward request and error logs to docker log collector
+ln -sf /dev/stdout /var/log/nginx/access.log && \
+ln -sf /dev/stderr /var/log/nginx/error.log
 
-
-
-
-
+# use my template nginx conf file
 ADD nginx.conf /etc/nginx/nginx.conf
-
+# expose port 80
 EXPOSE 80
 
 STOPSIGNAL SIGTERM
