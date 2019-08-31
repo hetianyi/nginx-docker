@@ -1,5 +1,6 @@
 # build nginx docker images with stream module
 FROM alpine:3.10.2
+
 MAINTAINER "hehety<hehety@outlook.com>"
 
 ARG NGINX_VERSION=${NGINX_VERSION:-1.15.8}
@@ -74,6 +75,7 @@ ln -sf /dev/stderr /var/log/nginx/error.log
 
 # use my template nginx conf file
 ADD nginx.conf /etc/nginx/nginx.conf
+
 # expose port 80
 EXPOSE 80
 
