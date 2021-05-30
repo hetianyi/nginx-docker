@@ -66,7 +66,7 @@ cd openresty-${NGINX_VERSION} && \
 --with-pcre \
 --with-libatomic && \
 make -j4 && make install && \
-cp -rf build/nginx-1.19.3/docs/html /usr/share/nginx && \
+cp -rf build/nginx-*/docs/html /usr/share/nginx && \
 rm -rf /tmp/* && \
 mkdir -p /var/run && \
 mkdir -p /var/log/nginx && \
@@ -78,8 +78,9 @@ apk add --no-cache tzdata && \
 ln -sf /dev/stdout /var/log/nginx/access.log && \
 ln -sf /dev/stderr /var/log/nginx/error.log
 
-# expose port 80
+# expose port 80 and 443
 EXPOSE 80
+EXPOSE 443
 
 STOPSIGNAL SIGTERM
 
