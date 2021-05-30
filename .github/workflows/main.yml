@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: 
+      - main
+
+jobs:
+  build-all:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-18.04
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # 检出代码
+    - uses: actions/checkout@v2
+
+      # 构建Java代码
+    - name: Write Tag
+      run:  |
+        export TZ="Asia/Shanghai"
+        export NGINX_VERSION=1.17.8.2
+        echo "[--------------------------------------- Docker Tag ${NGINX_VERSION} ---------------------------------------]"
+        docker build --build-arg NGINX_VERSION=${NGINX_VERSION} -t hehety/openresty:${NGINX_VERSION} -f Dockerfile-openresty .
+        docker tag hehety/openresty:${NGINX_VERSION} hehety/openresty:latest
+        docker push hehety/openresty:${NGINX_VERSION}
+        docker push hehety/openresty:latest
+      # 构建Java代码
+    - name: Build Java
+      run:  |
+        
+
+
