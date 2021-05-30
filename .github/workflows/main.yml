@@ -1,4 +1,4 @@
-name: CI
+name: OpenResty
 
 on:
   push:
@@ -16,18 +16,16 @@ jobs:
     - uses: actions/checkout@v2
 
       # 构建Java代码
-    - name: Write Tag
+    - name: Build
+      env:
+        DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+        DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
       run:  |
         export TZ="Asia/Shanghai"
         export NGINX_VERSION=1.17.8.2
         echo "[--------------------------------------- Docker Tag ${NGINX_VERSION} ---------------------------------------]"
         docker build --build-arg NGINX_VERSION=${NGINX_VERSION} -t hehety/openresty:${NGINX_VERSION} -f Dockerfile-openresty .
+        docker login registry.cn-hongkong.aliyuncs.com -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD
         docker tag hehety/openresty:${NGINX_VERSION} hehety/openresty:latest
         docker push hehety/openresty:${NGINX_VERSION}
         docker push hehety/openresty:latest
-      # 构建Java代码
-    - name: Build Java
-      run:  |
-        
-
-
