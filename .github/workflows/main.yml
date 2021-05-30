@@ -22,7 +22,7 @@ jobs:
         DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
       run:  |
         export TZ="Asia/Shanghai"
-        export NGINX_VERSION=1.15.8.3
+        export NGINX_VERSION=1.13.6.2
         echo "[--------------------------------------- Docker Tag ${NGINX_VERSION} ---------------------------------------]"
         docker build --build-arg NGINX_VERSION=${NGINX_VERSION} -t hehety/openresty:${NGINX_VERSION} -f Dockerfile-openresty .
         docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD
