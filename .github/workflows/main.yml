@@ -4,17 +4,14 @@ on:
   push:
     branches: 
       - main
-
 jobs:
   build-all:
     # The type of runner that the job will run on
     runs-on: ubuntu-18.04
-
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # 检出代码
     - uses: actions/checkout@v2
-
       # 构建Java代码
     - name: Build
       env:
@@ -22,7 +19,7 @@ jobs:
         DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
       run:  |
         export TZ="Asia/Shanghai"
-        export NGINX_VERSION=1.13.6.2
+        export NGINX_VERSION=1.19.3.1
         echo "[--------------------------------------- Docker Tag ${NGINX_VERSION} ---------------------------------------]"
         docker build --build-arg NGINX_VERSION=${NGINX_VERSION} -t hehety/openresty:${NGINX_VERSION} -f Dockerfile-openresty .
         docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD
