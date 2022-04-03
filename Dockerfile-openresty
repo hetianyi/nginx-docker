@@ -25,8 +25,8 @@ cd /tmp && \
 wget https://openresty.org/download/openresty-${NGINX_VERSION}.tar.gz && \
 tar -xzf openresty-${NGINX_VERSION}.tar.gz && \
 cd openresty-${NGINX_VERSION} && \
+mkdir -p /usr/share/nginx && \
 ./configure \
---prefix=/usr/share/nginx \
 --sbin-path=/usr/bin/nginx \
 --conf-path=/etc/nginx/nginx.conf \
 --pid-path=/var/run/nginx.pid \
@@ -67,7 +67,7 @@ cd openresty-${NGINX_VERSION} && \
 --with-pcre \
 --with-libatomic && \
 make -j2 && make install && \
-cp -rf build/nginx-1.19.3/docs/html /usr/share/nginx && \
+cp -rf build/nginx-1.19.3/docs/html /usr/share/nginx/ && \
 rm -rf /tmp/* && \
 mkdir -p /var/run && \
 mkdir -p /var/log/nginx && \
