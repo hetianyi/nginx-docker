@@ -1,11 +1,12 @@
 # build nginx docker images with stream module
-FROM arm32v6/alpine:3.10.2
+FROM alpine:3.16
 
 MAINTAINER "hehety<hehety@outlook.com>"
 
-ARG NGINX_VERSION=${NGINX_VERSION:-1.15.8}
+ARG NGINX_VERSION=${NGINX_VERSION:-1.21.4.1}
 
 ENV NGINX_VERSION $NGINX_VERSION
+ENV TZ "Asia/Shanghai"
 
 RUN apk add --no-cache --virtual .build-deps \
         libxslt-dev \
@@ -17,14 +18,16 @@ RUN apk add --no-cache --virtual .build-deps \
         zlib-dev \
         build-base \
         libaio-dev \
+        linux-headers \
         openssl-dev && \
 addgroup -g 101 -S nginx && \
 adduser -S -D -H -u 101 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx && \
 cd /tmp && \
-wget http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz && \
-tar -xzf nginx-${NGINX_VERSION}.tar.gz && \
-cd nginx-${NGINX_VERSION} && \
-./configure --prefix=/usr/share/nginx \
+wget https://openresty.org/download/openresty-${NGINX_VERSION}.tar.gz && \
+tar -xzf openresty-${NGINX_VERSION}.tar.gz && \
+cd openresty-${NGINX_VERSION} && \
+mkdir -p /usr/share/nginx && \
+./configure \
 --sbin-path=/usr/bin/nginx \
 --conf-path=/etc/nginx/nginx.conf \
 --pid-path=/var/run/nginx.pid \
@@ -32,9 +35,12 @@ cd nginx-${NGINX_VERSION} && \
 --error-log-path=/var/log/nginx/error.log \
 --http-log-path=/var/log/nginx/access.log \
 --user=nginx \
+--with-debug \
+--with-http_iconv_module \
 --with-select_module \
 --with-poll_module \
 --with-threads \
+--with-file-aio \
 --with-http_ssl_module \
 --with-http_v2_module \
 --with-http_realip_module \
@@ -44,6 +50,8 @@ cd nginx-${NGINX_VERSION} && \
 --with-http_geoip_module \
 --with-http_sub_module \
 --with-http_dav_module \
+--with-http_flv_module \
+--with-http_mp4_module \
 --with-http_gunzip_module \
 --with-http_gzip_static_module \
 --with-http_auth_request_module \
@@ -52,21 +60,23 @@ cd nginx-${NGINX_VERSION} && \
 --with-http_degradation_module \
 --with-http_slice_module \
 --with-http_stub_status_module \
+--with-mail \
+--with-mail_ssl_module \
 --with-stream \
 --with-stream_ssl_module \
 --with-stream_realip_module \
 --with-stream_geoip_module \
 --with-stream_ssl_preread_module \
 --with-compat \
---with-libatomic \
---with-debug && \
-make && make install && \
-cp -rf html /usr/share/nginx && \
+--with-pcre \
+--with-libatomic && \
+make -j4 && make install && \
+cp -rf build/nginx-1.21.4/docs/html /usr/share/nginx/ && \
 rm -rf /tmp/* && \
 mkdir -p /var/run && \
 mkdir -p /var/log/nginx && \
 apk del .build-deps && \
-apk add libxslt libxml2 gd geoip libatomic_ops pcre zlib openssl && \
+apk add libxslt libxml2 gd geoip libatomic_ops pcre zlib openssl libgcc && \
 # Bring in tzdata so users could set the timezones through the environment
 apk add --no-cache tzdata && \
 # forward request and error logs to docker log collector
@@ -76,8 +86,9 @@ ln -sf /dev/stderr /var/log/nginx/error.log
 # use my template nginx conf file
 ADD nginx.conf /etc/nginx/nginx.conf
 
-# expose port 80
+# expose port 80 443
 EXPOSE 80
+EXPOSE 443
 
 STOPSIGNAL SIGTERM
 

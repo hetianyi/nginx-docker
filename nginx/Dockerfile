@@ -74,7 +74,7 @@ ln -sf /dev/stdout /var/log/nginx/access.log && \
 ln -sf /dev/stderr /var/log/nginx/error.log
 
 # use my template nginx conf file
-ADD nginx.conf /etc/nginx/nginx.conf
+ADD ../nginx.conf /etc/nginx/nginx.conf
 
 # expose port 80
 EXPOSE 80
