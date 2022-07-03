@@ -18,6 +18,31 @@ RUN apk add --no-cache --virtual .build-deps \
         build-base \
         libaio-dev \
         openssl-dev && \
+        libmaxminddb && \
+        libmaxminddb-dev && \
+        openldap-dev && \
+
+
+apk add dlibmaxminddb
+  72 apk add libmaxminddb
+ 119 apk add maxminddb
+ 120 apk add libmaxminddb
+ 167 apk add libmaxminddb-dev
+ 215 apk add ldap-dev
+ 216 apk add libldap-dev
+ 217 apk add libldap
+ 218 apk add libldap-dev
+ 221 history | grep 'apk add'
+ 222 apk add libmaxminddb-dev
+ 223 apk add libldap2-dev
+ 224 apk add libldap2
+ 225 apk add openldap
+ 227 apk add openldap-dev
+ 233  apk add nano
+ 238 apk add ffmpeg
+
+
+
 addgroup -g 101 -S nginx && \
 adduser -S -D -H -u 101 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx && \
 cd /tmp && \
@@ -72,7 +97,7 @@ rm -rf /tmp/* && \
 mkdir -p /var/run && \
 mkdir -p /var/log/nginx && \
 apk del .build-deps && \
-apk add libxslt libxml2 gd geoip libatomic_ops pcre zlib openssl libgcc && \
+apk add libxslt libxml2 gd geoip libatomic_ops pcre zlib openssl libgcc libmaxminddb && \
 # Bring in tzdata so users could set the timezones through the environment
 apk add --no-cache tzdata && \
 # forward request and error logs to docker log collector
