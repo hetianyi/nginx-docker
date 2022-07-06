@@ -1,4 +1,3 @@
-# build nginx docker images with stream module
 FROM alpine:3.16
 
 MAINTAINER "hehety<hehety@outlook.com>"
@@ -31,11 +30,10 @@ cd /tmp && \
 wget https://openresty.org/download/openresty-${NGINX_SUB_VERSION}.tar.gz && \
 tar -xzf openresty-${NGINX_SUB_VERSION}.tar.gz && \
 cd openresty-${NGINX_SUB_VERSION} && \
-mkdir -p /usr/share/nginx && \
 mv /tmp/modules ./ && \
 ./configure \
---prefix=/usr/share/nginx \
---sbin-path=/usr/bin/nginx \
+--prefix=/usr/share \
+--sbin-path=/usr/sbin/nginx \
 --conf-path=/etc/nginx/nginx.conf \
 --pid-path=/var/run/nginx.pid \
 --lock-path=/var/run/nginx.lock \
@@ -82,20 +80,14 @@ mv /tmp/modules ./ && \
 --add-module=modules/nginx-upsync-module \
 --add-module=modules/ngx_http_geoip2_module && \
 make -j8 && make install && \
-cp -rf build/nginx-${NGINX_VERSION}/docs/html /usr/share/nginx/ && \
 rm -rf /tmp/* && \
 mkdir -p /var/run && \
 mkdir -p /var/log/nginx && \
 apk del .build-deps && \
 apk add libxslt libxml2 gd geoip libatomic_ops pcre zlib openssl libgcc openldap ffmpeg libmaxminddb && \
-# Bring in tzdata so users could set the timezones through the environment
 apk add --no-cache tzdata && \
-# forward request and error logs to docker log collector
 ln -sf /dev/stdout /var/log/nginx/access.log && \
 ln -sf /dev/stderr /var/log/nginx/error.log
-
-# use my template nginx conf file
-ADD nginx.conf /etc/nginx/nginx.conf
 
 # expose port 80 443
 EXPOSE 80
