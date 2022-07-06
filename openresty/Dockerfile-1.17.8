@@ -1,15 +1,12 @@
-# build nginx docker images with stream module
 FROM alpine:3.16
 
 MAINTAINER "hehety<hehety@outlook.com>"
 
-ARG NGINX_VERSION=${NGINX_VERSION:-1.21.4}
-ARG NGINX_SUB_VERSION=${NGINX_VERSION}.1
+ARG NGINX_VERSION=${NGINX_VERSION:-1.17.8}
+ARG NGINX_SUB_VERSION=${NGINX_VERSION}.2
 
 ENV NGINX_VERSION $NGINX_VERSION
 ENV TZ "Asia/Shanghai"
-
-ADD modules.tar.gz /tmp/modules
 
 RUN apk add --no-cache --virtual .build-deps \
         libxslt-dev \
@@ -22,9 +19,7 @@ RUN apk add --no-cache --virtual .build-deps \
         build-base \
         libaio-dev \
         linux-headers \
-        openssl-dev \
-        libmaxminddb-dev \
-        openldap-dev && \
+        openssl-dev && \
 addgroup -g 101 -S nginx && \
 adduser -S -D -H -u 101 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx && \
 cd /tmp && \
@@ -32,7 +27,6 @@ wget https://openresty.org/download/openresty-${NGINX_SUB_VERSION}.tar.gz && \
 tar -xzf openresty-${NGINX_SUB_VERSION}.tar.gz && \
 cd openresty-${NGINX_SUB_VERSION} && \
 mkdir -p /usr/share/nginx && \
-mv /tmp/modules ./ && \
 ./configure \
 --prefix=/usr/share/nginx \
 --sbin-path=/usr/bin/nginx \
@@ -43,11 +37,9 @@ mv /tmp/modules ./ && \
 --http-log-path=/var/log/nginx/access.log \
 --user=nginx \
 --with-debug \
---with-http_iconv_module \
 --with-select_module \
 --with-poll_module \
 --with-threads \
---with-file-aio \
 --with-http_ssl_module \
 --with-http_v2_module \
 --with-http_realip_module \
@@ -76,18 +68,14 @@ mv /tmp/modules ./ && \
 --with-stream_ssl_preread_module \
 --with-compat \
 --with-pcre \
---with-libatomic \
---add-module=modules/nginx-auth-ldap \
---add-module=modules/nginx-rtmp-module \
---add-module=modules/nginx-upsync-module \
---add-module=modules/ngx_http_geoip2_module && \
-make -j8 && make install && \
+--with-libatomic && \
+make -j4 && make install && \
 cp -rf build/nginx-${NGINX_VERSION}/docs/html /usr/share/nginx/ && \
 rm -rf /tmp/* && \
 mkdir -p /var/run && \
 mkdir -p /var/log/nginx && \
 apk del .build-deps && \
-apk add libxslt libxml2 gd geoip libatomic_ops pcre zlib openssl libgcc openldap ffmpeg libmaxminddb && \
+apk add libxslt libxml2 gd geoip libatomic_ops pcre zlib openssl libgcc && \
 # Bring in tzdata so users could set the timezones through the environment
 apk add --no-cache tzdata && \
 # forward request and error logs to docker log collector
