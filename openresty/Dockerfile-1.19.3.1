@@ -1,8 +1,9 @@
-FROM arm32v6/alpine:3.10.2
+FROM alpine:3.16
 
 MAINTAINER "hehety<hehety@outlook.com>"
 
 ARG NGINX_VERSION=${NGINX_VERSION:-1.19.3}
+ARG NGINX_SUB_VERSION=${NGINX_VERSION}.1
 
 ENV NGINX_VERSION $NGINX_VERSION
 ENV TZ "Asia/Shanghai"
@@ -17,38 +18,14 @@ RUN apk add --no-cache --virtual .build-deps \
         zlib-dev \
         build-base \
         libaio-dev \
+        linux-headers \
         openssl-dev && \
-        libmaxminddb && \
-        libmaxminddb-dev && \
-        openldap-dev && \
-
-
-apk add dlibmaxminddb
-  72 apk add libmaxminddb
- 119 apk add maxminddb
- 120 apk add libmaxminddb
- 167 apk add libmaxminddb-dev
- 215 apk add ldap-dev
- 216 apk add libldap-dev
- 217 apk add libldap
- 218 apk add libldap-dev
- 221 history | grep 'apk add'
- 222 apk add libmaxminddb-dev
- 223 apk add libldap2-dev
- 224 apk add libldap2
- 225 apk add openldap
- 227 apk add openldap-dev
- 233  apk add nano
- 238 apk add ffmpeg
-
-
-
 addgroup -g 101 -S nginx && \
 adduser -S -D -H -u 101 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx && \
 cd /tmp && \
-wget https://openresty.org/download/openresty-${NGINX_VERSION}.tar.gz && \
-tar -xzf openresty-${NGINX_VERSION}.tar.gz && \
-cd openresty-${NGINX_VERSION} && \
+wget https://openresty.org/download/openresty-${NGINX_SUB_VERSION}.tar.gz && \
+tar -xzf openresty-${NGINX_SUB_VERSION}.tar.gz && \
+cd openresty-${NGINX_SUB_VERSION} && \
 mkdir -p /usr/share/nginx && \
 ./configure \
 --prefix=/usr/share/nginx \
@@ -82,8 +59,9 @@ mkdir -p /usr/share/nginx && \
 --with-http_degradation_module \
 --with-http_slice_module \
 --with-http_stub_status_module \
+--with-mail \
+--with-mail_ssl_module \
 --with-stream \
---with-stream=dynamic \
 --with-stream_ssl_module \
 --with-stream_realip_module \
 --with-stream_geoip_module \
@@ -97,7 +75,7 @@ rm -rf /tmp/* && \
 mkdir -p /var/run && \
 mkdir -p /var/log/nginx && \
 apk del .build-deps && \
-apk add libxslt libxml2 gd geoip libatomic_ops pcre zlib openssl libgcc libmaxminddb && \
+apk add libxslt libxml2 gd geoip libatomic_ops pcre zlib openssl libgcc && \
 # Bring in tzdata so users could set the timezones through the environment
 apk add --no-cache tzdata && \
 # forward request and error logs to docker log collector

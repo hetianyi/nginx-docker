@@ -1,9 +1,9 @@
-# build nginx docker images with stream module
 FROM alpine:3.16
 
 MAINTAINER "hehety<hehety@outlook.com>"
 
-ARG NGINX_VERSION=${NGINX_VERSION:-1.21.4.1}
+ARG NGINX_VERSION=${NGINX_VERSION:-1.21.4}
+ARG NGINX_SUB_VERSION=${NGINX_VERSION}.1
 
 ENV NGINX_VERSION $NGINX_VERSION
 ENV TZ "Asia/Shanghai"
@@ -23,11 +23,12 @@ RUN apk add --no-cache --virtual .build-deps \
 addgroup -g 101 -S nginx && \
 adduser -S -D -H -u 101 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx && \
 cd /tmp && \
-wget https://openresty.org/download/openresty-${NGINX_VERSION}.tar.gz && \
-tar -xzf openresty-${NGINX_VERSION}.tar.gz && \
-cd openresty-${NGINX_VERSION} && \
+wget https://openresty.org/download/openresty-${NGINX_SUB_VERSION}.tar.gz && \
+tar -xzf openresty-${NGINX_SUB_VERSION}.tar.gz && \
+cd openresty-${NGINX_SUB_VERSION} && \
 mkdir -p /usr/share/nginx && \
 ./configure \
+--prefix=/usr/share/nginx \
 --sbin-path=/usr/bin/nginx \
 --conf-path=/etc/nginx/nginx.conf \
 --pid-path=/var/run/nginx.pid \
@@ -71,7 +72,7 @@ mkdir -p /usr/share/nginx && \
 --with-pcre \
 --with-libatomic && \
 make -j4 && make install && \
-cp -rf build/nginx-1.21.4/docs/html /usr/share/nginx/ && \
+cp -rf build/nginx-${NGINX_VERSION}/docs/html /usr/share/nginx/ && \
 rm -rf /tmp/* && \
 mkdir -p /var/run && \
 mkdir -p /var/log/nginx && \
