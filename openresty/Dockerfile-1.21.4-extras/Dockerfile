@@ -11,7 +11,7 @@ ENV TZ "Asia/Shanghai"
 ADD modules.tar.gz /tmp/modules
 
 RUN sed -i "s@https://dl-cdn.alpinelinux.org/@https://repo.huaweicloud.com/@g" /etc/apk/repositories && \
-        apk add --no-cache --virtual .build-deps \
+	apk add --no-cache --virtual .build-deps \
         libxslt-dev \
         libxml2 \
         gd-dev \
